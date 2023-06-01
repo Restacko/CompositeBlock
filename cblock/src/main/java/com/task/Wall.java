@@ -7,15 +7,40 @@ import java.util.Optional;
 import java.util.Stack;
 
 public class Wall implements Structure {
-    private static final boolean COUNT_COMPOSITES = false;
-    private static final boolean LIST_COMPOSITES = false;
-    private static final boolean SKIP_COMPOSITES = true;
-    private List<Block> blocks;
-    private Stack<Iterator<Block>> stack;
+    protected static final boolean COUNT_COMPOSITES = false;
+    protected static final boolean LIST_COMPOSITES = false;
+    protected static final boolean SKIP_COMPOSITES = true;
+    protected List<Block> blocks;
+
+    protected class WallIterator {
+        protected Stack<Iterator<Block>> iteratorStack;
+
+        public WallIterator(List<Block> blocks) {
+            this.iteratorStack = new Stack<>();
+            this.iteratorStack.add(blocks.iterator());
+        }
+
+        public boolean hasNextBlock() {
+            while (!this.iteratorStack.empty() && !iteratorStack.peek().hasNext())
+                this.iteratorStack.pop();
+            if (this.iteratorStack.empty())
+                return false;
+            return this.iteratorStack.peek().hasNext();
+        }
+
+        public Optional<Block> nextBlock() {
+            Block block = iteratorStack.peek().next();
+            if (block instanceof CompositeBlock) {
+                CompositeBlock compositeBlock = (CompositeBlock) block;
+                if (!compositeBlock.getBlocks().isEmpty())
+                    this.iteratorStack.add(compositeBlock.getBlocks().iterator());
+            }
+            return Optional.of(block);
+        }
+    }
 
     public Wall() {
-        blocks = new ArrayList<>();
-        stack = new Stack<>();
+        this.blocks = new ArrayList<>();
     }
 
     public Wall(List<Block> blocks) {
@@ -24,34 +49,11 @@ public class Wall implements Structure {
             this.blocks = blocks;
     }
 
-    private void setIterator() {
-        stack = new Stack<>();
-        stack.add(blocks.iterator());
-    }
-
-    private boolean hasNextBlock() {
-        while (!stack.empty() && !stack.peek().hasNext())
-            stack.pop();
-        if (stack.empty())
-            return false;
-        return stack.peek().hasNext();
-    }
-
-    private Optional<Block> nextBlock() {
-        Block block = stack.peek().next();
-        if (block instanceof CompositeBlock) {
-            CompositeBlock cBlock = (CompositeBlock) block;
-            if (!cBlock.getBlocks().isEmpty())
-                stack.add(cBlock.getBlocks().iterator());
-        }
-        return Optional.of(block);
-    }
-
     @Override
     public Optional<Block> findBlockByColor(String color) {
-        setIterator();
-        while (hasNextBlock()) {
-            Block block = nextBlock().get();
+        WallIterator wallIterator = new WallIterator(this.blocks);
+        while (wallIterator.hasNextBlock()) {
+            Block block = wallIterator.nextBlock().get();
             if (block instanceof CompositeBlock && SKIP_COMPOSITES)
                 continue;
             if (block.getColor() == color)
@@ -62,35 +64,27 @@ public class Wall implements Structure {
 
     @Override
     public List<Block> findBlocksByMaterial(String material) {
-        List<Block> blocks = new ArrayList<>();
-        setIterator();
-        while (hasNextBlock()) {
-            Block block = nextBlock().get();
+        List<Block> foundBlocks = new ArrayList<>();
+        WallIterator wallIterator = new WallIterator(this.blocks);
+        while (wallIterator.hasNextBlock()) {
+            Block block = wallIterator.nextBlock().get();
             if (block instanceof CompositeBlock && !LIST_COMPOSITES)
                 continue;
             if (block.getMaterial().equals(material))
-                blocks.add(block);
+                foundBlocks.add(block);
         }
-        return blocks;
+        return foundBlocks;
     }
 
     @Override
     public int count() {
         int count = 0;
-        setIterator();
-        while (hasNextBlock()) {
-            if (nextBlock().get() instanceof CompositeBlock && !COUNT_COMPOSITES)
+        WallIterator wallIterator = new WallIterator(this.blocks);
+        while (wallIterator.hasNextBlock()) {
+            if (wallIterator.nextBlock().get() instanceof CompositeBlock && !COUNT_COMPOSITES)
                 continue;
             count++;
         }
         return count;
     }
-
-    public void printColors() {
-        setIterator();
-        while (hasNextBlock()) {
-            System.out.println(nextBlock().get().getColor());
-        }
-    }
-
 }
