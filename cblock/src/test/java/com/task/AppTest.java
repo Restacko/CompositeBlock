@@ -35,7 +35,7 @@ public class AppTest {
         blocks2 = new ArrayList<>();
         blocks2.add(new SampleBlock("White2", "Concrete"));
         blocks2.add(new SampleBlock("Red2", "Sand"));
-        blocks2.add(new GluedBlock(blocks3));
+        blocks2.add(new GluedBlock("Yellow","mat",blocks3));
         blocks2.add(new SampleBlock("Orange2", "Dust"));
         blocks2.add(new SampleBlock("Gray", "mat"));
 
@@ -79,11 +79,11 @@ public class AppTest {
     public void wallWithCompositesBlocksCount() {
         // Classic
         Wall wall = new Wall(blocks);
-        assertTrue(wall.count() == 12);
+        assertTrue(wall.count() == 16);
 
-        // Lambda version
+        //Lambda version
         wall = new WallLambda(blocks);
-        assertTrue(wall.count() == 12);
+        assertTrue(wall.count() == 16);
 
     }
 
@@ -151,11 +151,11 @@ public class AppTest {
     public void materialCountWithComposites() {
         // Classic
         Wall wall = new Wall(blocks);
-        assertTrue(wall.findBlocksByMaterial("mat").size() == 4);
+        assertTrue(wall.findBlocksByMaterial("mat").size() == 5);
 
         // Lambda version
         wall = new WallLambda(blocks);
-        assertTrue(wall.findBlocksByMaterial("mat").size() == 4);
+        assertTrue(wall.findBlocksByMaterial("mat").size() == 5);
     }
 
     @Test

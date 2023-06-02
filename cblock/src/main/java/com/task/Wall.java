@@ -7,9 +7,6 @@ import java.util.Optional;
 import java.util.Stack;
 
 public class Wall implements Structure {
-    protected static final boolean COUNT_COMPOSITES = false;
-    protected static final boolean LIST_COMPOSITES = false;
-    protected static final boolean SKIP_COMPOSITES = true;
     protected List<Block> blocks;
 
     protected class WallIterator {
@@ -54,8 +51,6 @@ public class Wall implements Structure {
         WallIterator wallIterator = new WallIterator(this.blocks);
         while (wallIterator.hasNextBlock()) {
             Block block = wallIterator.nextBlock().get();
-            if (block instanceof CompositeBlock && SKIP_COMPOSITES)
-                continue;
             if (block.getColor() == color)
                 return Optional.of(block);
         }
@@ -68,8 +63,6 @@ public class Wall implements Structure {
         WallIterator wallIterator = new WallIterator(this.blocks);
         while (wallIterator.hasNextBlock()) {
             Block block = wallIterator.nextBlock().get();
-            if (block instanceof CompositeBlock && !LIST_COMPOSITES)
-                continue;
             if (block.getMaterial().equals(material))
                 foundBlocks.add(block);
         }
@@ -81,8 +74,7 @@ public class Wall implements Structure {
         int count = 0;
         WallIterator wallIterator = new WallIterator(this.blocks);
         while (wallIterator.hasNextBlock()) {
-            if (wallIterator.nextBlock().get() instanceof CompositeBlock && !COUNT_COMPOSITES)
-                continue;
+            wallIterator.nextBlock();
             count++;
         }
         return count;

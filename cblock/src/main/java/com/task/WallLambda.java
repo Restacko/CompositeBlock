@@ -17,8 +17,6 @@ public class WallLambda extends Wall {
         public void forEachBlock(Predicate<Block> fun) {
             while (hasNextBlock()) {
                 Block block = nextBlock().get();
-                if (block instanceof CompositeBlock && SKIP_COMPOSITES)
-                    continue;
                 if (fun.test(block))
                     return;
             }
