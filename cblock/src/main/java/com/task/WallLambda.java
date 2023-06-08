@@ -8,18 +8,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 public class WallLambda extends Wall {
-
-    protected class WallLambdaIterator extends WallIterator {
-        public WallLambdaIterator(List<Block> blocks) {
-            super(blocks);
-        }
-
-        public void forEachBlock(Predicate<Block> fun) {
-            while (hasNextBlock()) {
-                Block block = nextBlock().get();
-                if (fun.test(block))
-                    return;
-            }
+    public void forEachBlock(Predicate<Block> fun) {
+        for (Block block : this) {
+            if (fun.test(block))
+                return;
         }
     }
 
@@ -34,8 +26,7 @@ public class WallLambda extends Wall {
     @Override
     public Optional<Block> findBlockByColor(String color) {
         final Stack<Block> blockWrapper = new Stack<>();
-        WallLambdaIterator wallLambdaIterator = new WallLambdaIterator(this.blocks);
-        wallLambdaIterator.forEachBlock((block) -> {
+        forEachBlock((block) -> {
             if (block.getColor() == color) {
                 blockWrapper.add(block);
                 return true;
@@ -50,8 +41,7 @@ public class WallLambda extends Wall {
     @Override
     public List<Block> findBlocksByMaterial(String material) {
         List<Block> foundBlocks = new ArrayList<>();
-        WallLambdaIterator wallLambdaIterator = new WallLambdaIterator(this.blocks);
-        wallLambdaIterator.forEachBlock((block) -> {
+        forEachBlock((block) -> {
             if (block.getMaterial() == material) {
                 foundBlocks.add(block);
             }
@@ -63,8 +53,7 @@ public class WallLambda extends Wall {
     @Override
     public int count() {
         final AtomicInteger count = new AtomicInteger(0);
-        WallLambdaIterator wallLambdaIterator = new WallLambdaIterator(this.blocks);
-        wallLambdaIterator.forEachBlock((block) -> {
+        forEachBlock((block) -> {
             count.incrementAndGet();
             return false;
         });

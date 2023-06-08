@@ -6,33 +6,29 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 
-public class Wall implements Structure {
+public class Wall implements Structure, Iterable<Block> {
     protected List<Block> blocks;
 
-    protected class WallIterator {
-        protected Stack<Iterator<Block>> iteratorStack;
+    protected class WallIterator implements Iterator<Block>{
+        protected Stack<Block> blocksStack;
 
         public WallIterator(List<Block> blocks) {
-            this.iteratorStack = new Stack<>();
-            this.iteratorStack.add(blocks.iterator());
+            this.blocksStack = new Stack<>();
+            this.blocksStack.addAll(blocks);
         }
-
-        public boolean hasNextBlock() {
-            while (!this.iteratorStack.empty() && !iteratorStack.peek().hasNext())
-                this.iteratorStack.pop();
-            if (this.iteratorStack.empty())
-                return false;
-            return this.iteratorStack.peek().hasNext();
+        @Override
+        public boolean hasNext() {
+            return !this.blocksStack.empty();
         }
-
-        public Optional<Block> nextBlock() {
-            Block block = iteratorStack.peek().next();
+        @Override
+        public Block next() {
+            Block block = blocksStack.pop();
             if (block instanceof CompositeBlock) {
                 CompositeBlock compositeBlock = (CompositeBlock) block;
                 if (!compositeBlock.getBlocks().isEmpty())
-                    this.iteratorStack.add(compositeBlock.getBlocks().iterator());
+                    this.blocksStack.addAll(compositeBlock.getBlocks());
             }
-            return Optional.of(block);
+            return block;
         }
     }
 
@@ -48,9 +44,7 @@ public class Wall implements Structure {
 
     @Override
     public Optional<Block> findBlockByColor(String color) {
-        WallIterator wallIterator = new WallIterator(this.blocks);
-        while (wallIterator.hasNextBlock()) {
-            Block block = wallIterator.nextBlock().get();
+        for (Block block : this) {
             if (block.getColor() == color)
                 return Optional.of(block);
         }
@@ -60,9 +54,7 @@ public class Wall implements Structure {
     @Override
     public List<Block> findBlocksByMaterial(String material) {
         List<Block> foundBlocks = new ArrayList<>();
-        WallIterator wallIterator = new WallIterator(this.blocks);
-        while (wallIterator.hasNextBlock()) {
-            Block block = wallIterator.nextBlock().get();
+        for (Block block : this) {
             if (block.getMaterial().equals(material))
                 foundBlocks.add(block);
         }
@@ -72,11 +64,14 @@ public class Wall implements Structure {
     @Override
     public int count() {
         int count = 0;
-        WallIterator wallIterator = new WallIterator(this.blocks);
-        while (wallIterator.hasNextBlock()) {
-            wallIterator.nextBlock();
+        for(Block block : this){
             count++;
-        }
+        }   
         return count;
+    }
+
+    @Override
+    public Iterator<Block> iterator() {
+        return new WallIterator(blocks);
     }
 }
